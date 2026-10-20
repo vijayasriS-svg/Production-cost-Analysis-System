@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labour Cost Form - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom ">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom active">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="mb-4">
+        <a href="/labour-costs" class="text-decoration-none small text-muted">&larr; Back to Labour Costs</a>
+        <h2 class="fw-bold mb-0" th:text="${isNew ? 'Record Labour Expense' : 'Edit Labour Record'}">Labour Form</h2>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="max-width: 800px;">
+        <form th:action="@{/labour-costs/save}" th:object="${labourCost}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" id="totalLabourCost" th:field="*{totalLabourCost}">
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Labour Code</label>
+                    <input type="text" th:field="*{labourCode}" class="form-control" readonly style="background:#f8fafc;">
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label small fw-semibold">Associated Production Order</label>
+                    <select th:field="*{machineProduction}" class="form-select">
+                        <option value="">-- General Factory Work (Unallocated) --</option>
+                        <option th:each="prod : ${productions}" th:value="${prod.id}" th:text="${prod.productionCode + ' - ' + (prod.product != null ? prod.product.name : '')}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Standard Workshop Rate Presets -->
+            <div class="p-3 mb-3 bg-light rounded border border-warning">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-dark"><i class="bi bi-stars text-warning me-1"></i>Preset Standard Workshop Rates</span>
+                    <span class="badge bg-warning text-dark font-monospace">Quick Auto-Fill</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadLabourPreset('press')">
+                        <strong>Press Operation &amp; Printing</strong> (1 Worker &times; 1.0h @ $22.00 = $22.00)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="loadLabourPreset('trimming')">
+                        <strong>Guillotine Trimming, Packing &amp; QC</strong> (1 Worker &times; 0.5h @ $16.00 = $8.00)
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Work Description <span class="text-danger">*</span></label>
+                <input type="text" th:field="*{workDescription}" class="form-control" required placeholder="e.g. Press setup, UV varnish handling, folding & collation">
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Worker Count</label>
+                    <input type="number" id="workerCount" th:field="*{workerCount}" class="form-control" required min="1">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Hours Worked</label>
+                    <input type="number" step="0.1" id="hoursWorked" th:field="*{hoursWorked}" class="form-control" required min="0">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Hourly Rate ($)</label>
+                    <input type="number" step="0.01" id="hourlyRate" th:field="*{hourlyRate}" class="form-control" required min="0">
+                </div>
+            </div>
+
+            <div class="calc-preview-box mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Automated Calculated Total:</span>
+                        <div class="fs-4 fw-bold text-navy" id="liveLabourCost">$0.00</div>
+                    </div>
+                    <div class="text-end text-muted small">
+                        Formula: <code>Worker Count &times; Hours &times; Rate</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Recorded Date</label>
+                    <input type="date" th:field="*{recordedDate}" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Calculation Method</label>
+                    <select th:field="*{calculationMethod}" class="form-select">
+                        <option value="HOURLY_RATE">HOURLY_RATE (Workers &times; Hours &times; Rate)</option>
+                        <option value="PIECE_RATE">PIECE_RATE (Output Based)</option>
+                        <option value="FIXED_CONTRACT">FIXED_CONTRACT (Contractor Rate)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Save Labour Record</button>
+                <a href="/labour-costs" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+<script>
+function loadLabourPreset(type) {
+    if (type === 'press') {
+        const desc = document.querySelector('[name="workDescription"]');
+        if (desc) desc.value = 'Press Operation & Printing';
+        const w = document.getElementById('workerCount');
+        if (w) w.value = 1;
+        const h = document.getElementById('hoursWorked');
+        if (h) h.value = 1.0;
+        const r = document.getElementById('hourlyRate');
+        if (r) r.value = 22.00;
+    } else if (type === 'trimming') {
+        const desc = document.querySelector('[name="workDescription"]');
+        if (desc) desc.value = 'Guillotine Trimming, Packing & Inspection';
+        const w = document.getElementById('workerCount');
+        if (w) w.value = 1;
+        const h = document.getElementById('hoursWorked');
+        if (h) h.value = 0.5;
+        const r = document.getElementById('hourlyRate');
+        if (r) r.value = 16.00;
+    }
+    const wc = parseFloat(document.getElementById('workerCount')?.value) || 0;
+    const hw = parseFloat(document.getElementById('hoursWorked')?.value) || 0;
+    const hr = parseFloat(document.getElementById('hourlyRate')?.value) || 0;
+    const total = (wc * hw * hr).toFixed(2);
+    const live = document.getElementById('liveLabourCost');
+    if (live) live.innerText = '$' + total;
+    const hidden = document.getElementById('totalLabourCost');
+    if (hidden) hidden.value = total;
+}
+</script>
+</body>
+</html>

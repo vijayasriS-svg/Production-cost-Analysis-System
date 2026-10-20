@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Analysis Form - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom ">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom ">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom active">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="mb-4">
+        <a href="/production-cost-analysis" class="text-decoration-none small text-muted">&larr; Back to Cost Analyses</a>
+        <h2 class="fw-bold mb-0">Production Cost & Profit Analysis Engine</h2>
+        <p class="text-muted small">Server-side automated validation & live mathematical breakdown</p>
+    </div>
+
+    <!-- Automated Run Trigger Card -->
+    <div class="card border-primary mb-4 shadow-sm" style="background:#f0f9ff; border-style:dashed;">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-primary mb-2"><i class="bi bi-lightning-charge-fill me-2"></i>One-Click Auto Pull & Calculate</h5>
+            <p class="text-muted small mb-3">Select a production order to automatically pull consumed raw materials, operational machine hours, recorded labour, and allocated expenses from database tables:</p>
+            <form th:action="@{/production-cost-analysis/calculate}" method="post" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label small fw-semibold">Target Production Run</label>
+                    <select name="productionId" class="form-select" required>
+                        <option th:each="p : ${productions}" th:value="${p.id}" th:text="${p.productionCode + ' (' + (p.product != null ? p.product.name : '') + ') - Qty: ' + p.quantityProduced}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Actual Sold Quantity</label>
+                    <input type="number" name="actualSoldQuantity" class="form-control" placeholder="0 if unsold" min="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Selling Price / Unit ($)</label>
+                    <input type="number" step="0.01" name="sellingPricePerUnit" class="form-control" placeholder="Std Price">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-arrow-repeat me-1"></i> Run Analysis
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order #VIS-500 Standard Preset Card -->
+    <div class="card border-info mb-4 shadow-sm" style="background:#f8fafc; border-left:4px solid #0284c7;">
+        <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+                <span class="badge bg-primary mb-1">Standard Invoicing Preset</span>
+                <div class="fw-bold small text-navy">Order #VIS-500: Visiting Cards Sales &amp; Invoicing</div>
+                <div class="text-muted" style="font-size:0.8rem;">
+                    Materials: $54.70 &bull; Labour: $30.00 &bull; Machine: $25.76 &bull; Overheads: $6.50 &bull;
+                    <strong>COGS: $116.96</strong> &bull; Client Invoiced: <strong>1 Pack @ $180.00 ($0.36/card)</strong> &bull;
+                    Net Profit: <strong class="text-success">$63.04</strong> &bull; Margin: <strong class="text-info">35.02%</strong>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" onclick="applyVis500Preset()">
+                <i class="bi bi-magic me-1"></i> Apply Order #VIS-500
+            </button>
+        </div>
+    </div>
+
+    <!-- Detailed Form Card -->
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <form th:action="@{/production-cost-analysis/save}" th:object="${analysis}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Analysis Code</label>
+                    <input type="text" th:field="*{analysisCode}" class="form-control" readonly style="background:#f8fafc;">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Selected Production Run <span class="text-danger">*</span></label>
+                    <select th:field="*{machineProduction}" class="form-select" required>
+                        <option th:each="prod : ${productions}" th:value="${prod.id}" th:text="${prod.productionCode + ' - ' + (prod.product != null ? prod.product.name : '')}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Analysis Date</label>
+                    <input type="date" th:field="*{analysisDate}" class="form-control" required>
+                </div>
+            </div>
+
+            <h6 class="fw-bold text-navy border-bottom pb-2 mb-3">Cost Component Breakdown (Database Sourced)</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Raw Material Cost ($)</label>
+                    <input type="number" step="0.01" id="rawMaterialCost" th:field="*{rawMaterialCost}" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Labour Cost ($)</label>
+                    <input type="number" step="0.01" id="labourCost" th:field="*{labourCost}" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Machine Operational Cost ($)</label>
+                    <input type="number" step="0.01" id="machineCost" th:field="*{machineCost}" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Other Expenses ($)</label>
+                    <input type="number" step="0.01" id="otherExpenseCost" th:field="*{otherExpenseCost}" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Produced Quantity</label>
+                    <input type="number" id="analysisProducedQty" th:field="*{producedQuantity}" class="form-control" required min="1">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Actual Realized Sold Quantity</label>
+                    <input type="number" id="actualSoldQuantity" th:field="*{actualSoldQuantity}" class="form-control" min="0">
+                    <div class="form-text small">Only sold quantities count toward realized revenue.</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Selling Price Per Unit ($)</label>
+                    <input type="number" step="0.0001" id="sellingPricePerUnit" th:field="*{sellingPricePerUnit}" class="form-control" min="0">
+                </div>
+            </div>
+
+            <div class="form-check form-switch mb-4">
+                <input class="form-check-input" type="checkbox" th:field="*{salesRecorded}" id="salesRecordedSwitch">
+                <label class="form-check-label small fw-semibold" for="salesRecordedSwitch">Enable Realized Sales Revenue &amp; Profit Reporting</label>
+            </div>
+
+            <!-- Mathematical Live Automated Preview -->
+            <div class="p-4 bg-light rounded-3 border mb-4">
+                <div class="row text-center g-3">
+                    <div class="col-md-2 col-6">
+                        <div class="text-muted small fw-semibold">TOTAL PRODUCTION COST</div>
+                        <div class="fs-5 fw-bold text-navy" id="liveTotalCost">$0.00</div>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <div class="text-muted small fw-semibold">COST PER UNIT</div>
+                        <div class="fs-5 fw-bold text-primary" id="liveCostPerUnit">$0.0000</div>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <div class="text-muted small fw-semibold">COGS</div>
+                        <div class="fs-5 fw-bold text-indigo" id="liveCogs">$0.00</div>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <div class="text-muted small fw-semibold">REALIZED REVENUE</div>
+                        <div class="fs-5 fw-bold text-success" id="liveRevenue">$0.00</div>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <div class="text-muted small fw-semibold">NET REALIZED PROFIT</div>
+                        <div class="fs-5 fw-bold text-success" id="liveProfit">$0.00</div>
+                    </div>
+                    <div class="col-md-2 col-12">
+                        <div class="text-muted small fw-semibold">PROFIT MARGIN</div>
+                        <div class="fs-5 fw-bold text-info" id="liveProfitMargin">0.00%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-semibold">Financial & Production Notes</label>
+                <textarea th:field="*{notes}" class="form-control" rows="2" placeholder="Audit remarks, wastage factor, client order invoice number..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Verify & Save Analysis</button>
+                <a href="/production-cost-analysis" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

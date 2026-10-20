@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Form - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom ">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom ">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom active">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="mb-4">
+        <a href="/other-expenses" class="text-decoration-none small text-muted">&larr; Back to Other Expenses</a>
+        <h2 class="fw-bold mb-0" th:text="${isNew ? 'Record Expense' : 'Edit Expense Details'}">Expense Form</h2>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="max-width: 800px;">
+        <form th:action="@{/other-expenses/save}" th:object="${expense}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Expense Code</label>
+                    <input type="text" th:field="*{expenseCode}" class="form-control" readonly style="background:#f8fafc;">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Expense Type <span class="text-danger">*</span></label>
+                    <select th:field="*{expenseType}" class="form-select" required>
+                        <option value="Electricity">Electricity</option>
+                        <option value="Transport">Transport / Delivery</option>
+                        <option value="Packaging">Packaging Materials</option>
+                        <option value="Plates/Chemicals">Plates & Wash Chemicals</option>
+                        <option value="Maintenance">Maintenance & Repair</option>
+                        <option value="Overhead">Factory Overhead</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Linked Production Order</label>
+                    <select th:field="*{machineProduction}" class="form-select">
+                        <option value="">-- General / Unallocated --</option>
+                        <option th:each="prod : ${productions}" th:value="${prod.id}" th:text="${prod.productionCode + ' - ' + (prod.product != null ? prod.product.name : '')}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Standard Overhead Presets -->
+            <div class="p-3 mb-3 bg-light rounded border border-success">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-dark"><i class="bi bi-stars text-success me-1"></i>Preset Standard Job Overheads</span>
+                    <span class="badge bg-success text-white font-monospace">Quick Auto-Fill</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="loadExpensePreset('box')">
+                        <strong>Visiting Card Acrylic / Cardboard Box</strong> (1 unit &times; $1.50 = $1.50)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadExpensePreset('courier')">
+                        <strong>Local Courier / Delivery</strong> (1 delivery &times; $5.00 = $5.00)
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Description <span class="text-danger">*</span></label>
+                <input type="text" th:field="*{description}" class="form-control" required placeholder="e.g. Courier delivery pallets, press meter electricity consumption">
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Quantity</label>
+                    <input type="number" step="0.01" id="expenseQuantity" th:field="*{quantity}" class="form-control" required min="0.01">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Unit Price ($)</label>
+                    <input type="number" step="0.01" id="expenseUnitPrice" th:field="*{unitPrice}" class="form-control" required min="0">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Calculated Total</label>
+                    <div class="form-control bg-light fw-bold text-navy" id="liveExpenseTotal">$0.00</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Expense Date</label>
+                    <input type="date" th:field="*{expenseDate}" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Save Expense</button>
+                <a href="/other-expenses" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+<script>
+function loadExpensePreset(type) {
+    if (type === 'box') {
+        const typeElem = document.querySelector('[name="expenseType"]');
+        if (typeElem) typeElem.value = 'Packaging';
+        const descElem = document.querySelector('[name="description"]');
+        if (descElem) descElem.value = 'Visiting Card Acrylic / Cardboard Box';
+        const qElem = document.getElementById('expenseQuantity');
+        if (qElem) qElem.value = 1.0;
+        const pElem = document.getElementById('expenseUnitPrice');
+        if (pElem) pElem.value = 1.50;
+    } else if (type === 'courier') {
+        const typeElem = document.querySelector('[name="expenseType"]');
+        if (typeElem) typeElem.value = 'Transport';
+        const descElem = document.querySelector('[name="description"]');
+        if (descElem) descElem.value = 'Local Courier / Delivery';
+        const qElem = document.getElementById('expenseQuantity');
+        if (qElem) qElem.value = 1.0;
+        const pElem = document.getElementById('expenseUnitPrice');
+        if (pElem) pElem.value = 5.00;
+    }
+    const q = parseFloat(document.getElementById('expenseQuantity')?.value) || 0;
+    const p = parseFloat(document.getElementById('expenseUnitPrice')?.value) || 0;
+    const total = (q * p).toFixed(2);
+    const live = document.getElementById('liveExpenseTotal');
+    if (live) live.innerText = '$' + total;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Productions - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom ">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom active">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom ">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Machine & Production Orders</h2>
+            <p class="text-muted small mb-0">Record press runs, machine hours, rejected defect tracking, and material consumption.</p>
+        </div>
+        <div>
+            <a href="/machine-productions/new" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> New Production Run
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success py-2" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger py-2" th:text="${errorMessage}"></div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <form th:action="@{/machine-productions}" method="get" class="row g-2 mb-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Search orders by code, batch, product...">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Product Item</th>
+                        <th>Batch Number</th>
+                        <th>Produced Qty</th>
+                        <th>Rejected</th>
+                        <th>Net Good Qty</th>
+                        <th>Machine Cost</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${productions}">
+                        <td class="fw-bold" th:text="${p.productionCode}">PROD-001</td>
+                        <td th:text="${p.product != null ? p.product.name : 'Unknown'}">Brochure</td>
+                        <td><span class="badge bg-secondary" th:text="${p.batchNumber}">BATCH-01</span></td>
+                        <td th:text="${#numbers.formatInteger(p.quantityProduced, 1, 'COMMA')}">1000</td>
+                        <td class="text-danger fw-semibold" th:text="${#numbers.formatInteger(p.quantityRejected, 1, 'COMMA')}">20</td>
+                        <td class="text-success fw-bold" th:text="${#numbers.formatInteger(p.netGoodQuantity, 1, 'COMMA')}">980</td>
+                        <td>$<span th:text="${#numbers.formatDecimal(p.totalMachineCost, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                        <td th:text="${p.productionDate}">2024-09-15</td>
+                        <td>
+                            <span class="badge bg-success" th:if="${p.status == 'COMPLETED'}">COMPLETED</span>
+                            <span class="badge bg-warning text-dark" th:if="${p.status == 'IN_PROGRESS'}">IN PROGRESS</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/machine-productions/edit/' + ${p.id}}" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i> Manage</a>
+                            <a th:href="@{'/machine-productions/delete/' + ${p.id}}" class="btn btn-sm btn-outline-danger" data-confirm="Delete this production run?"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

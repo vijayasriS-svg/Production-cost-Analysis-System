@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw Material Details - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom active">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom ">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="mb-4">
+        <a href="/raw-materials" class="text-decoration-none small text-muted">&larr; Back to Raw Materials</a>
+        <h2 class="fw-bold mb-0" th:text="${isNew ? 'Register New Raw Material' : 'Edit Material & Stock Movement History'}">Material Form</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-3">Material Profile</h5>
+                <form th:action="@{/raw-materials/save}" th:object="${material}" method="post">
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold">Material Code</label>
+                            <input type="text" th:field="*{materialCode}" class="form-control" readonly style="background:#f8fafc;">
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label small fw-semibold">Material Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. Cyan Offset Ink">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Category <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{category}" class="form-control" required placeholder="Paper, Ink, Chemicals...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Measurement Unit <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{unit}" class="form-control" required placeholder="Sheets, Reams, Kg, Liters...">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Unit Price ($)</label>
+                            <input type="number" step="0.01" th:field="*{unitPrice}" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Opening Stock</label>
+                            <input type="number" step="0.01" th:field="*{openingStock}" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Current Stock</label>
+                            <input type="number" step="0.01" th:field="*{currentStock}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Minimum Safety Stock Alert Threshold</label>
+                        <input type="number" step="0.01" th:field="*{minimumStockAlert}" class="form-control" required>
+                        <div class="form-text small">Alert triggers automatically when current stock &le; threshold.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">Save Material</button>
+                        <a href="/raw-materials" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stock Movement History (Audit Trail) -->
+        <div class="col-lg-6" th:if="${!isNew}">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2 text-primary"></i>Stock Movement Ledger</h5>
+                <div class="table-responsive" style="max-height: 400px; overflow-y:auto;">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Total Cost</th>
+                                <th>Note / Order</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="mov : ${movements}">
+                                <td>
+                                    <span th:if="${mov.movementType == 'PURCHASE'}" class="badge bg-success">PURCHASE</span>
+                                    <span th:if="${mov.movementType == 'PRODUCTION_CONSUMPTION'}" class="badge bg-danger">CONSUMED</span>
+                                    <span th:if="${mov.movementType == 'OPENING'}" class="badge bg-secondary">OPENING</span>
+                                </td>
+                                <td class="fw-semibold" th:text="${#numbers.formatDecimal(mov.quantity, 1, 'COMMA', 2, 'POINT')}">0</td>
+                                <td>$<span th:text="${#numbers.formatDecimal(mov.totalCost, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                                <td class="small text-muted" th:text="${mov.referenceNote}">Note</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(movements)}">
+                                <td colspan="4" class="text-center text-muted py-3">No movement logs recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Seagull Printers - Production Cost Analysis System",
+  "description": "Enterprise Production Cost Analysis, Stock Automation, and Financial Reporting System for Seagull Printers with Spring Boot, MySQL, and full ZIP export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

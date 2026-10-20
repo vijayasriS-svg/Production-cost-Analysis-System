@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labour Costs - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom ">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom active">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Labour Cost Management</h2>
+            <p class="text-muted small mb-0">Operator wages, pre-press setups, bindery labour, and automated hourly calculations.</p>
+        </div>
+        <div>
+            <a href="/labour-costs/new" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> + Record Labour Cost
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success py-2 d-flex align-items-center justify-content-between" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger py-2" th:text="${errorMessage}"></div>
+
+    <!-- Preset Standard Workshop Rates Card -->
+    <div class="card border-0 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid #f59e0b !important;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-clock-history text-warning me-2"></i>Preset Standard Workshop Rates</h5>
+                <p class="text-muted small mb-0">The system computes labor automatically using your preset standard workshop rates:</p>
+            </div>
+            <span class="badge bg-warning text-dark px-3 py-2 fw-bold font-monospace fs-6">
+                Total Labour Cost: Auto-calculated as $30.00
+            </span>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="p-3 bg-white rounded-3 border shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-dark small"><i class="bi bi-printer text-primary me-1"></i>Press Operation &amp; Printing</strong>
+                        <span class="badge bg-light text-dark font-monospace fw-bold border">$22.00</span>
+                    </div>
+                    <div class="text-muted small font-monospace">1 Worker &times; 1.0 hour @ $22.00 = <strong class="text-dark">$22.00</strong></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-white rounded-3 border shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-dark small"><i class="bi bi-scissors text-success me-1"></i>Guillotine Trimming, Packing &amp; Inspection</strong>
+                        <span class="badge bg-light text-dark font-monospace fw-bold border">$8.00</span>
+                    </div>
+                    <div class="text-muted small font-monospace">1 Worker &times; 0.5 hour @ $8.00 = <strong class="text-dark">$8.00</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Labour Code</th>
+                        <th>Work Description</th>
+                        <th>Production Order</th>
+                        <th>Workers</th>
+                        <th>Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Total Labour Cost</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="l : ${labourList}">
+                        <td class="fw-bold" th:text="${l.labourCode}">LBR-001</td>
+                        <td th:text="${l.workDescription}">Press Operator</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${l.machineProduction != null ? l.machineProduction.productionCode : 'General'}">General</span></td>
+                        <td th:text="${l.workerCount}">1</td>
+                        <td th:text="${l.hoursWorked}">8.0</td>
+                        <td>$<span th:text="${#numbers.formatDecimal(l.hourlyRate, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                        <td class="fw-bold text-navy">$<span th:text="${#numbers.formatDecimal(l.totalLabourCost, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                        <td th:text="${l.recordedDate}">2024-09-15</td>
+                        <td>
+                            <a th:href="@{'/labour-costs/edit/' + ${l.id}}" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
+                            <a th:href="@{'/labour-costs/delete/' + ${l.id}}" class="btn btn-sm btn-outline-danger" data-confirm="Delete this labour entry?"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(labourList)}">
+                        <td colspan="9" class="text-center text-muted py-4">No labour costs recorded yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

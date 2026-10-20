@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw Materials & Stock - Seagull Printers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <aside class="app-sidebar">
+        <div class="brand-header">
+            <div style="width:36px; height:36px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.1rem;">
+                SP
+            </div>
+            <div>
+                <h1 class="brand-title">Seagull Printers</h1>
+                <p class="brand-subtitle">Cost Analysis & Stock</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main Console</div>
+            <a href="/dashboard" class="nav-link-custom ">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+
+            <div class="nav-section-label">Manufacturing Operations</div>
+            <a href="/products" class="nav-link-custom ">
+                <i class="bi bi-box-seam-fill"></i> Product Catalog
+            </a>
+            <a href="/raw-materials" class="nav-link-custom active">
+                <i class="bi bi-layers-fill"></i> Raw Materials & Stock
+            </a>
+            <a href="/machine-productions" class="nav-link-custom ">
+                <i class="bi bi-gear-wide-connected"></i> Machine Production
+            </a>
+
+            <div class="nav-section-label">Cost Centers</div>
+            <a href="/labour-costs" class="nav-link-custom ">
+                <i class="bi bi-people-fill"></i> Labour Costs
+            </a>
+            <a href="/other-expenses" class="nav-link-custom ">
+                <i class="bi bi-receipt-cutoff"></i> Other Expenses
+            </a>
+
+            <div class="nav-section-label">Financial Analytics</div>
+            <a href="/production-cost-analysis" class="nav-link-custom ">
+                <i class="bi bi-calculator-fill"></i> Cost & Profit Analysis
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="fw-bold text-white small" sec:authentication="name">Operator</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Seagull Printers Team</div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+    
+
+<main class="main-wrapper">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Raw Materials & Stock Inventory</h2>
+            <p class="text-muted small mb-0">Track stock movements, purchases, consumption deductions, and reorder levels.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-warning btn-sm text-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#consumptionModal">
+                <i class="bi bi-box-arrow-down me-1"></i> Record Consumption
+            </button>
+            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#purchaseModal">
+                <i class="bi bi-cart-plus me-1"></i> Stock Purchase Order
+            </button>
+            <a href="/raw-materials/new" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> New Material Definition
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success py-2" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger py-2" th:text="${errorMessage}"></div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <form th:action="@{/raw-materials}" method="get" class="row g-2 mb-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Search materials by code or name...">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    <a th:if="${search != null and !search.isEmpty()}" href="/raw-materials" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Material Code</th>
+                        <th>Material Name</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Unit Price</th>
+                        <th>Current Stock</th>
+                        <th>Min Alert</th>
+                        <th>Stock Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${materials}">
+                        <td class="fw-bold" th:text="${m.materialCode}">MAT-001</td>
+                        <td th:text="${m.name}">Gloss Art Paper</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${m.category}">Paper</span></td>
+                        <td th:text="${m.unit}">Reams</td>
+                        <td>$<span th:text="${#numbers.formatDecimal(m.unitPrice, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                        <td class="fw-bold" th:text="${#numbers.formatDecimal(m.currentStock, 1, 'COMMA', 2, 'POINT')}">100.00</td>
+                        <td class="text-muted" th:text="${#numbers.formatDecimal(m.minimumStockAlert, 1, 'COMMA', 2, 'POINT')}">10.00</td>
+                        <td>
+                            <span th:if="${m.isLowStock()}" class="badge badge-low-stock">
+                                <i class="bi bi-exclamation-triangle me-1"></i> LOW STOCK
+                            </span>
+                            <span th:unless="${m.isLowStock()}" class="badge badge-in-stock">
+                                <i class="bi bi-check-circle me-1"></i> Available
+                            </span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-warning text-dark me-1" data-bs-toggle="modal" data-bs-target="#consumptionModal">
+                                <i class="bi bi-box-arrow-down"></i> Consume
+                            </button>
+                            <a th:href="@{'/raw-materials/edit/' + ${m.id}}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> View / Audit</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Purchase Stock Modal -->
+<div class="modal fade" id="purchaseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/raw-materials/purchase}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Record Stock Purchase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select Material</label>
+                        <select name="materialId" class="form-select" required>
+                            <option th:each="mat : ${materials}" th:value="${mat.id}" th:text="${mat.materialCode + ' - ' + mat.name + ' (' + mat.unit + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Purchase Quantity</label>
+                            <input type="number" step="0.01" name="quantity" class="form-control" required min="0.01">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Unit Price ($)</label>
+                            <input type="number" step="0.01" name="unitPrice" class="form-control" placeholder="Leave blank for standard">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Supplier / Reference Note</label>
+                        <input type="text" name="notes" class="form-control" placeholder="e.g. Supplier PO #4092">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add to Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Record Material Consumption Modal -->
+<div class="modal fade" id="consumptionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/raw-materials/consume}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-arrow-down text-warning me-2"></i>Record Material Consumption</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Visiting Card 500 Presets -->
+                    <div class="p-2.5 mb-3 bg-light rounded border border-warning">
+                        <div class="d-flex justify-content-between align-items-center mb-1.5">
+                            <span class="small fw-bold text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Order #VIS-500 Material Presets</span>
+                            <span class="badge bg-warning text-dark font-monospace">$54.70 Recipe</span>
+                        </div>
+                        <div class="row g-1">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 text-start py-1 px-2" onclick="loadVisitingCardPreset(2, 25.0, 'Order #VIS-500: Deduct 25 parent sheets for 500 visiting cards ($9.50)')">
+                                    <div class="small fw-bold text-truncate">Silk Board 350gsm</div>
+                                    <div class="text-muted" style="font-size: 11px;">25 sheets &rarr; $9.50</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 text-start py-1 px-2" onclick="loadVisitingCardPreset(7, 4.0, 'Order #VIS-500: Deduct 4 plates (CMYK separation) ($27.20)')">
+                                    <div class="small fw-bold text-truncate">Thermal CTP Plates</div>
+                                    <div class="text-muted" style="font-size: 11px;">4 plates &rarr; $27.20</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 text-start py-1 px-2" onclick="loadVisitingCardPreset(8, 0.20, 'Order #VIS-500: Deduct 0.2 roll matte thermal film ($13.00)')">
+                                    <div class="small fw-bold text-truncate">Matte Thermal Film</div>
+                                    <div class="text-muted" style="font-size: 11px;">0.2 roll &rarr; $13.00</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 text-start py-1 px-2" onclick="loadVisitingCardPreset(9, 1.0, 'Order #VIS-500: Deduct process ink allowance ($5.00)')">
+                                    <div class="small fw-bold text-truncate">Process Inks</div>
+                                    <div class="text-muted" style="font-size: 11px;">1 allowance &rarr; $5.00</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select Raw Material <span class="text-danger">*</span></label>
+                        <select name="materialId" id="consumeMaterialSelect" class="form-select" required>
+                            <option th:each="mat : ${materials}" th:value="${mat.id}" th:text="${mat.materialCode + ' - ' + mat.name + ' (Avail: ' + mat.currentStock + ' ' + mat.unit + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Quantity Consumed <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="quantity" id="consumeQuantityInput" class="form-control" required min="0.01" placeholder="e.g. 25.00">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Link to Production Order (Optional)</label>
+                        <select name="productionId" class="form-select">
+                            <option value="">-- No Direct Job Linked (General Consumption) --</option>
+                            <option th:each="prod : ${productions}" th:value="${prod.id}" th:text="${prod.productionCode + ' - ' + (prod.product != null ? prod.product.name : '') + ' (' + prod.batchNumber + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Consumption Reference Note</label>
+                        <input type="text" name="notes" id="consumeNotesInput" class="form-control" placeholder="e.g. Order #VIS-500: Deduct 25 parent sheets for 500 visiting cards ($9.50)">
+                        <div class="form-text small">Logged permanently to material stock movements audit ledger.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold">Deduct from Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+<script>
+function loadVisitingCardPreset(matId, qty, note) {
+    const matSelect = document.getElementById('consumeMaterialSelect');
+    if (matSelect) {
+        matSelect.value = matId;
+    }
+    const qtyInput = document.getElementById('consumeQuantityInput');
+    if (qtyInput) {
+        qtyInput.value = qty;
+    }
+    const notesInput = document.getElementById('consumeNotesInput');
+    if (notesInput) {
+        notesInput.value = note;
+    }
+}
+</script>
+</body>
+</html>
